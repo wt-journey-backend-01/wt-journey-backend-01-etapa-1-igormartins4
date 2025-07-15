@@ -71,20 +71,7 @@ app.get("/contato-recebido", (req, res) => {
     `);
 });
 
-app.post("/contato", (req, res) => {
-  const { nome, email, mensagem } = req.body;
-  res.send(`
-        <html>
-            <head><title>Contato Recebido</title></head>
-            <body>
-                <h1>Contato Recebido</h1>
-                <p><strong>Nome:</strong> ${nome}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Mensagem:</strong> ${mensagem}</p>
-            </body>
-        </html>
-    `);
-});
+// ...existing code...
 
 app.get("/api/lanches", (req, res) => {
   res.json([
