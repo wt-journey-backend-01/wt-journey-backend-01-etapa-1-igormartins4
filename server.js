@@ -4,6 +4,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(__dirname + "/public"));
 
@@ -15,26 +16,32 @@ app.get("/sugestao", (req, res) => {
   const { nome, ingredientes } = req.query;
   if (nome && ingredientes) {
     res.send(`
-            <html>
-                <head><title>Agradecimento</title></head>
-                <body>
-                    <h1>Obrigado pela sugestão, ${nome}!</h1>
-                    <p>Ingredientes sugeridos: <strong>${ingredientes}</strong></p>
-                    <a href="/">Voltar ao início</a>
-                </body>
-            </html>
-        `);
+      <html>
+        <head>
+          <title>Agradecimento</title>
+          <link rel="stylesheet" href="/css/style.css">
+        </head>
+        <body>
+          <h1>Obrigado pela sugestão, ${nome}!</h1>
+          <p>Ingredientes sugeridos: <strong>${ingredientes}</strong></p>
+          <a href="/">Voltar ao início</a>
+        </body>
+      </html>
+    `);
   } else {
     res.send(`
-            <html>
-                <head><title>Sugestão</title></head>
-                <body>
-                    <h1>Página de Sugestão</h1>
-                    <p>Envie sua sugestão pela página principal.</p>
-                    <a href="/">Voltar ao início</a>
-                </body>
-            </html>
-        `);
+      <html>
+        <head>
+          <title>Sugestão</title>
+          <link rel="stylesheet" href="/css/style.css">
+        </head>
+        <body>
+          <h1>Página de Sugestão</h1>
+          <p>Envie sua sugestão pela página principal.</p>
+          <a href="/">Voltar ao início</a>
+        </body>
+      </html>
+    `);
   }
 });
 
@@ -44,56 +51,47 @@ app.get("/contato", (req, res) => {
 
 app.post("/contato", (req, res) => {
   const { nome, email, assunto, mensagem } = req.body;
-
   const params = new URLSearchParams({
     nome,
     email,
     assunto,
     mensagem,
   }).toString();
-  res.redirect(`/contato-recebido?${params}`);
+  res.redirect(302, `/contato-recebido?${params}`);
 });
 
 app.get("/contato-recebido", (req, res) => {
   const { nome, email, assunto, mensagem } = req.query;
-  res.send(`
-        <html>
-            <head><title>Contato Recebido</title></head>
-            <body>
-                <h1>Obrigado pelo contato!</h1>
-                <p><strong>Nome:</strong> ${nome || ""}</p>
-                <p><strong>Email:</strong> ${email || ""}</p>
-                <p><strong>Assunto:</strong> ${assunto || ""}</p>
-                <p><strong>Mensagem:</strong> ${mensagem || ""}</p>
-                <a href="/">Voltar ao início</a>
-            </body>
-        </html>
-    `);
+  res.status(200).send(`
+    <html>
+      <head><title>Contato Recebido</title></head>
+      <link rel="stylesheet" href="/css/style.css">
+      <body>
+        <h1>Obrigado pelo contato!</h1>
+        <p><strong>Nome:</strong> ${nome}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Assunto:</strong> ${assunto}</p>
+        <p><strong>Mensagem:</strong> ${mensagem}</p>
+        <a href="/">Voltar ao início</a>
+      </body>
+    </html>
+  `);
 });
 
-// ...existing code...
+const fs = require("fs");
 
 app.get("/api/lanches", (req, res) => {
-  res.json([
-    {
-      id: 1,
-      nome: "DevBurger Clássico",
-      ingredientes:
-        "Pão brioche, Carne 150g, Queijo cheddar, Alface americana, Tomate fresco, Molho especial",
-    },
-    {
-      id: 2,
-      nome: "Burger de Bacon",
-      ingredientes:
-        "Pão australiano, Carne 180g, Queijo prato, Bacon crocante, Cebola caramelizada, Molho barbecue",
-    },
-    {
-      id: 3,
-      nome: "Commit Veggie",
-      ingredientes:
-        "Pão integral, Burger de grão de bico, Queijo vegano, Rúcula, Tomate seco, Maionese de ervas",
-    },
-  ]);
+  fs.readFile(__dirname + "/public/data/lanches.json", "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: "Erro ao ler lanches.json" });
+    }
+    try {
+      const lanches = JSON.parse(data);
+      res.json(lanches);
+    } catch (e) {
+      res.status(500).json({ error: "JSON inválido em lanches.json" });
+    }
+  });
 });
 
 app.use((req, res) => {
