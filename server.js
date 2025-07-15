@@ -99,11 +99,15 @@ app.get("/api/lanches", (req, res) => {
 app.use((req, res) => {
   res.status(404);
 
-  res.sendFile(__dirname + "/public/404.html", (err) => {
-    if (err) {
-      res.send("<h1>404 - Página não encontrada</h1>");
-    }
-  });
+  if (req.method === "GET") {
+    res.sendFile(__dirname + "/public/404.html", (err) => {
+      if (err) {
+        res.send("<h1>404 - Página não encontrada</h1>");
+      }
+    });
+  } else {
+    res.send("<h1>404 - Página não encontrada</h1>");
+  }
 });
 
 app.listen(PORT, () => {
